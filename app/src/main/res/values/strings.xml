@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Notification Resender</string>
+    <string name="action_settings">Settings</string>
+    <string name="settings_list">Your settings</string>
+    <string name="are_you_sure_title">Are you sure?</string>
+    <string name="are_you_sure_delete_setting_message">Do you really want to delete setting \'%1$s\'?</string>
+    <string name="setting_was_removed">Setting \'%1$s\' was removed</string>
+    <string name="setting_was_enabled">Setting \'%1$s\' was enabled</string>
+    <string name="setting_was_disabled">Setting \'%1$s\' was disabled</string>
+    <string name="setting_was_added">Setting \'%1$s\' was added</string>
+    <string name="name_title">Name:</string>
+    <string name="remove_delay_title">Notification removal delay (in seconds):</string>
+    <string name="add_setting_activity_title">Add setting</string>
+    <string name="add_setting_button">Add Setting</string>
+    <string name="title_activity_edit">Add Setting</string>
+    <string name="system_notice_need_notification_access">Please enable notification access for application</string>
+</resources>
