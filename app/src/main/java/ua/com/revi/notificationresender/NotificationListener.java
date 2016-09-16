@@ -41,18 +41,11 @@ public class NotificationListener extends NotificationListenerService {
             @Override
             public void run() {
                 try {
-                    /*int canNotice = 1;//AppNotification.canNotice(lastSbn.getPackageName());
-                    if (canNotice > 0) {
-                        Intent intent = new Intent(ACTION_NEW_NOTIFICATION_RECEIVED);
-                        intent.putExtra("data", Notif.fromSbn(lastSbn, canNotice));
-                        sendBroadcast(intent);
-                        return;
-                    }*/
                     Notification lastNotification = lastSbn.getNotification();
                     ApplicationInfo ai = pm.getApplicationInfo(lastSbn.getPackageName(), 0);
                     String applicationName = (String) (ai != null ? pm.getApplicationLabel(ai) : "(unknown)");
                     NotificationCompat.Builder builder = new NotificationCompat.Builder(listener)
-                            .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                            .setSmallIcon(R.mipmap.ic_launcher)
                             .setContentTitle(applicationName)
                             .setContentText(lastNotification.extras.get(Notification.EXTRA_TITLE).toString() + " - " + lastNotification.extras.get("android.text").toString());
 

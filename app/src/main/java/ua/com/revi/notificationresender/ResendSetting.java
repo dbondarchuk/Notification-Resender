@@ -16,13 +16,19 @@ public class ResendSetting {
     /* Selected apps */
     public String apps;
 
+    /* Notification title */
+    public String title;
+
+    /* Notification body */
+    public String body;
+
     /* Regex to exclude */
     public String excludeRegex;
 
     /* Determines whether to use regex on exclusion or not */
     public boolean useRegexForExclude;
 
-    /* Remove delay in seconds */
+    /* Remove delay in seconds. 0 - none */
     public int removeDelay;
 
     public ResendSetting(String name, boolean enabled){
