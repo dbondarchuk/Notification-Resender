@@ -1,9 +1,11 @@
 package ua.com.revi.notificationresender;
 
+import java.io.Serializable;
+
 /**
  * Created by v-dmbon on 9/15/2016.
  */
-public class ResendSetting {
+public class ResendSetting implements Serializable {
     /* Setting id */
     public int id;
 
@@ -31,8 +33,15 @@ public class ResendSetting {
     /* Remove delay in seconds. 0 - none */
     public int removeDelay;
 
-    public ResendSetting(String name, boolean enabled){
+    public ResendSetting(int id, String name, boolean enabled, String apps, String title, String body, String excludeRegex, boolean useRegexForExclude, int removeDelay){
         this.name = name;
         this.enabled = enabled;
+        this.id = id;
+        this.apps = apps;
+        this.title = title;
+        this.body = body;
+        this.excludeRegex = excludeRegex;
+        this.useRegexForExclude = useRegexForExclude;
+        this.removeDelay = removeDelay;
     }
 }

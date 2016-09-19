@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,11 +43,21 @@ public class ResendSettingArrayAdapter extends ArrayAdapter<ResendSetting> {
         final ImageButton removeButton = (ImageButton)row.findViewById(R.id.remove);
         removeButton.setTag(position);
         final ResendSettingArrayAdapter adapter = this;
+        final DbHelper dbHelper = new DbHelper(context);
 
+        nameTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, EditActivity.class);
+                intent.putExtra("setting", objects.get(position));
+                context.startActivity(intent);
+            }
+        });
         enabledSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 objects.get(position).enabled = isChecked;
+                dbHelper.enable(objects.get(position), isChecked);
                 Snackbar.make(row, context.getString(isChecked ? R.string.setting_was_enabled : R.string.setting_was_disabled, objects.get(position).name) , Snackbar.LENGTH_LONG).show();
             }
         });
@@ -61,7 +72,9 @@ public class ResendSettingArrayAdapter extends ArrayAdapter<ResendSetting> {
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
+                                dbHelper.remove(objects.get(position));
                                 objects.remove(position);
+
                                 adapter.notifyDataSetChanged();
                                 Snackbar.make(row, context.getString(R.string.setting_was_removed, name) , Snackbar.LENGTH_LONG).show();
                             }})

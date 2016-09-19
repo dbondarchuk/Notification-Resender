@@ -8,10 +8,24 @@
     <string name="setting_was_enabled">Setting \'%1$s\' was enabled</string>
     <string name="setting_was_disabled">Setting \'%1$s\' was disabled</string>
     <string name="setting_was_added">Setting \'%1$s\' was added</string>
+    <string name="setting_was_edited">Setting \'%1$s\' was edited</string>
     <string name="name_title">Name:</string>
-    <string name="remove_delay_title">Notification removal delay (in seconds):</string>
+    <string name="title_title">Title:</string>
+    <string name="body_title">Body:</string>
+    <string name="exclude_title">Exclude if contains (case sensitive):</string>
+    <string name="apps_title">Apps:</string>
+    <string name="select_apps_title">Select</string>
+    <string name="isExcludeRegex_title">Use Regex for exclude (advanced user)</string>
+    <string name="remove_delay_title">Notification removal delay (in seconds). 0 - don\'t remove:</string>
     <string name="add_setting_activity_title">Add setting</string>
+    <string name="edit_setting_activity_title">Edit setting</string>
     <string name="add_setting_button">Add Setting</string>
+    <string name="edit_setting_button">Edit Setting</string>
     <string name="title_activity_edit">Add Setting</string>
     <string name="system_notice_need_notification_access">Please enable notification access for application</string>
+    <string name="name_shouldnot_be_empty">Name shouldn\'t be empty</string>
+    <string name="title_shouldnot_be_empty">Title shouldn\'t be empty</string>
+    <string name="body_shouldnot_be_empty">Body shouldn\'t be empty</string>
+    <string name="wrong_regex">Please correct your regex</string>
+    <string name="name_already_taken">Name \'%1$s\' is already taken</string>
 </resources>
