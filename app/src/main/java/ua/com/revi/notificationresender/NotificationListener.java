@@ -16,8 +16,12 @@ import android.text.SpannableString;
 import android.util.Log;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Pattern;
 
 /**
  * Created by v-dmbon on 9/16/2016.
@@ -29,58 +33,92 @@ public class NotificationListener extends NotificationListenerService {
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        if (sbn.getPackageName().equals(getApplication().getPackageName())){
+        if (sbn.getPackageName().equals(getApplication().getPackageName())) {
             return;
         }
         Log.i("NOTIFICATION", "From package: " + sbn.getPackageName());
+        DbHelper dbHelper = new DbHelper(this);
+        ArrayList<ResendSetting> settings = dbHelper.getSettings();
+
         lastSbn = sbn;
         final NotificationListener listener = this;
         final PackageManager pm = getPackageManager();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Notification lastNotification = lastSbn.getNotification();
-                    ApplicationInfo ai = pm.getApplicationInfo(lastSbn.getPackageName(), 0);
-                    String applicationName = (String) (ai != null ? pm.getApplicationLabel(ai) : "(unknown)");
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(listener)
-                            .setSmallIcon(R.mipmap.ic_launcher)
-                            .setContentTitle(applicationName)
-                            .setContentText(lastNotification.extras.get(Notification.EXTRA_TITLE).toString() + " - " + lastNotification.extras.get("android.text").toString());
+        for (int i = 0; i < settings.size(); i++) {
+            final ResendSetting setting = settings.get(i);
+            List<String> apps = Arrays.asList(setting.apps.split("\\|"));
+            if (setting.enabled && apps.contains(sbn.getPackageName())) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Notification lastNotification = lastSbn.getNotification();
+                            ApplicationInfo ai = pm.getApplicationInfo(lastSbn.getPackageName(), 0);
+                            String applicationName = (String) (ai != null ? pm.getApplicationLabel(ai) : "(unknown)");
 
-                    int NOTIFICATION_ID = ++lastId;
-                    if (lastId > 1000){
-                        lastId = 1;
+                            if (setting.excludeRegex != null && setting.excludeRegex.length() > 0){
+                                String text = lastNotification.extras.get("android.text").toString();
+                                if (!setting.useRegexForExclude){
+                                    if (text.toLowerCase().contains(setting.excludeRegex.toLowerCase())){
+                                        return;
+                                    }
+                                } else {
+                                    Pattern pattern = Pattern.compile(setting.excludeRegex);
+                                    if (pattern.matcher(text).matches()){
+                                        return;
+                                    }
+                                }
+                            }
+
+                            String title = setting.title
+                                    .replace("%appName%", applicationName)
+                                    .replace("%title%", lastNotification.extras.get(Notification.EXTRA_TITLE).toString())
+                                    .replace("%text%", lastNotification.extras.get("android.text").toString());
+                            String body = setting.body
+                                    .replace("%appName%", applicationName)
+                                    .replace("%title%", lastNotification.extras.get(Notification.EXTRA_TITLE).toString())
+                                    .replace("%text%", lastNotification.extras.get("android.text").toString());
+
+                            NotificationCompat.Builder builder = new NotificationCompat.Builder(listener)
+                                    .setSmallIcon(R.mipmap.ic_launcher)
+                                    .setContentTitle(title)
+                                    .setContentText(body)
+                                    .setTicker(title + "\n" + body);
+
+                            int NOTIFICATION_ID = ++lastId;
+                            if (lastId > 1000) {
+                                lastId = 1;
+                            }
+
+                            Intent targetIntent = new Intent(listener, MainActivity.class);
+                            PendingIntent contentIntent = PendingIntent.getActivity(listener, 0, targetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                            builder.setContentIntent(contentIntent);
+                            NotificationManager nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                            nManager.notify(NOTIFICATION_ID, builder.build());
+
+                            if (setting.removeDelay > 0) {
+                                timer.schedule(new RemoveNotificationTask(NOTIFICATION_ID), setting.removeDelay * 1000);
+                            }
+
+                            return;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        Log.i("NOTIFICATION", "Package: " + lastSbn.getPackageName() + " skipped");
                     }
-
-                    Intent targetIntent = new Intent(listener, MainActivity.class);
-                    PendingIntent contentIntent = PendingIntent.getActivity(listener, 0, targetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    builder.setContentIntent(contentIntent);
-                    NotificationManager nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                    nManager.notify(NOTIFICATION_ID, builder.build());
-
-                    timer.schedule(new RemoveNotificationTask(NOTIFICATION_ID), 20000);
-
-                    return;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                Log.i("NOTIFICATION", "Package: " + lastSbn.getPackageName() + " skipped");
+                }).start();
             }
-        }).start();
+        }
     }
 
-    private class RemoveNotificationTask extends TimerTask
-    {
+    private class RemoveNotificationTask extends TimerTask {
         private int notificationId;
 
-        public RemoveNotificationTask(int notificationId){
+        public RemoveNotificationTask(int notificationId) {
             this.notificationId = notificationId;
         }
 
-        public void run()
-        {
+        public void run() {
             NotificationManager nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             nManager.cancel(notificationId);
         }

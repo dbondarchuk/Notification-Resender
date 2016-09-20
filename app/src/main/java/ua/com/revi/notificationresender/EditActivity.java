@@ -1,7 +1,11 @@
 package ua.com.revi.notificationresender;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -11,14 +15,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class EditActivity extends AppCompatActivity {
     private boolean isEdit = false;
     private ResendSetting originalSetting;
+
+    private String packages = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +43,27 @@ public class EditActivity extends AppCompatActivity {
             }
         }
 
+        Button addButton = (Button) this.findViewById(R.id.selectAppsButton);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent appSelectIntent = new Intent(EditActivity.this, AppSelectActivity.class);
+                appSelectIntent.putExtra("apps", packages);
+                startActivityForResult(appSelectIntent, 1);
+            }
+        });
+
+        ImageView showInfoButton = (ImageView) this.findViewById(R.id.showInfoButton);
+        showInfoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new AlertDialog.Builder(EditActivity.this)
+                        .setTitle(getString(R.string.edit_info_title))
+                        .setMessage(getString(R.string.edit_info_message))
+                        .setIcon(android.R.drawable.ic_menu_help)
+                        .setPositiveButton(android.R.string.ok, null).show();
+            }
+        });
         /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);*/
 
@@ -82,7 +111,7 @@ public class EditActivity extends AppCompatActivity {
             }
         }
 
-        ResendSetting setting = new ResendSetting(0, name, true, "", title, body, exclude, excludeRegexCheckbox.isChecked(), removalDelay);
+        ResendSetting setting = new ResendSetting(0, name, true, packages, title, body, exclude, excludeRegexCheckbox.isChecked(), removalDelay);
 
         if (isEdit){
             dbHelper.editSetting(originalSetting.id, setting);
@@ -100,6 +129,17 @@ public class EditActivity extends AppCompatActivity {
         }).show();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == 1) {
+            String apps = data.getStringExtra("apps");
+            TextView appsCountTextView = (TextView)this.findViewById(R.id.appsCountText);
+
+            packages = apps;
+            appsCountTextView.setText(String.valueOf(apps.length() > 0 ? apps.split("\\|").length : 0));
+        }
+    }
+
     private void initializeEdit(ResendSetting setting){
         EditText nameEdit = (EditText)this.findViewById(R.id.nameEditText);
         EditText titleEdit = (EditText)this.findViewById(R.id.titleEditText);
@@ -109,6 +149,7 @@ public class EditActivity extends AppCompatActivity {
         EditText removalDelayEdit = (EditText)this.findViewById(R.id.removalDelayText);
 
         TextView activityTitle = (TextView)this.findViewById(R.id.addSettingActivityTitle);
+        TextView appsCountTextView = (TextView)this.findViewById(R.id.appsCountText);
         Button addButton = (Button) this.findViewById(R.id.addSettingButton);
 
         nameEdit.setText(setting.name);
@@ -117,6 +158,9 @@ public class EditActivity extends AppCompatActivity {
         excludeEdit.setText(setting.excludeRegex);
         excludeRegexCheckbox.setChecked(setting.useRegexForExclude);
         removalDelayEdit.setText(String.valueOf(setting.removeDelay));
+
+        packages = setting.apps;
+        appsCountTextView.setText(String.valueOf(packages.length() > 0 ? packages.split("\\|").length : 0));
 
         activityTitle.setText(getString(R.string.edit_setting_activity_title));
         addButton.setText(getString(R.string.edit_setting_button));

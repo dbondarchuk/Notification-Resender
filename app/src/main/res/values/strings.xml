@@ -28,4 +28,7 @@
     <string name="body_shouldnot_be_empty">Body shouldn\'t be empty</string>
     <string name="wrong_regex">Please correct your regex</string>
     <string name="name_already_taken">Name \'%1$s\' is already taken</string>
+    <string name="select_apps_activity_title">Select Apps</string>
+    <string name="edit_info_title">Help</string>
+    <string name="edit_info_message" formatted="false">You can use such macroses in title and body:\n%appName% - will set name of application that sent notification\n%title% - title of the notification\n%text% - text of the notification</string>
 </resources>
